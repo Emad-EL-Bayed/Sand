@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقرير التحويلات المالية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg1:#ffffff;
+    --bg2:#f1f5f9;
+    --glass:#ffffff;
+    --glass-border:#e2e8f0;
+    --accent:#0284c7;
+    --accent2:#7c3aed;
+    --majid:#16a34a;
+    --mohammed:#d97706;
+    --text:#1e293b;
+    --muted:#64748b;
+    --success:#16a34a;
+    --shadow: 0 4px 20px rgba(15,23,42,0.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Tajawal', sans-serif;
+    background: radial-gradient(circle at 20% 10%, #f8fafc 0%, #eef2f7 55%, #e9edf3 100%);
+    color:var(--text);
+    min-height:100vh;
+    padding:24px 16px 60px;
+  }
+  .container{max-width:1400px; margin:0 auto;}
+  header{
+    text-align:center;
+    padding:32px 20px 40px;
+  }
+  header h1{
+    font-size:clamp(24px,4vw,38px);
+    font-weight:900;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    margin-bottom:8px;
+  }
+  header p{color:var(--muted); font-size:15px;}
+
+  .stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(190px,1fr));
+    gap:16px;
+    margin-bottom:40px;
+  }
+  .stat-card{
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:var(--shadow);
+    position:relative;
+    overflow:hidden;
+    transition:transform .25s ease;
+  }
+  .stat-card:hover{transform:translateY(-4px);}
+  .stat-card::before{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(135deg, rgba(56,189,248,0.08), rgba(167,139,250,0.05));
+    pointer-events:none;
+  }
+  .stat-card .label{font-size:13px; color:var(--muted); margin-bottom:6px; position:relative;}
+  .stat-card .value{font-size:24px; font-weight:700; position:relative;}
+  .stat-card.money .value{color:var(--accent);}
+  .stat-card.majid .value{color:var(--majid);}
+  .stat-card.mohammed .value{color:var(--mohammed);}
+
+  .section-title{
+    font-size:22px;
+    font-weight:700;
+    margin:36px 0 18px;
+    padding-right:14px;
+    border-right:4px solid var(--accent);
+  }
+
+  .cards-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(340px,1fr));
+    gap:20px;
+  }
+  .tx-card{
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-radius:20px;
+    padding:22px;
+    box-shadow:var(--shadow);
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .tx-card .card-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:8px;
+    border-bottom:1px solid var(--glass-border);
+    padding-bottom:12px;
+  }
+  .tx-card .card-head h3{font-size:17px; font-weight:700;}
+  .badge{
+    font-size:12px;
+    padding:4px 10px;
+    border-radius:999px;
+    background:rgba(56,189,248,0.15);
+    color:var(--accent);
+    border:1px solid rgba(56,189,248,0.3);
+    white-space:nowrap;
+  }
+  .card-meta{display:flex; gap:18px; font-size:13px; color:var(--muted);}
+  .card-meta b{color:var(--text); font-size:15px;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+  }
+  thead th{
+    text-align:right;
+    padding:8px 6px;
+    color:var(--muted);
+    font-weight:500;
+    cursor:pointer;
+    user-select:none;
+    border-bottom:1px solid var(--glass-border);
+    white-space:nowrap;
+  }
+  thead th:hover{color:var(--accent);}
+  thead th .arrow{font-size:10px; opacity:.6; margin-inline-start:4px;}
+  tbody td{
+    padding:7px 6px;
+    border-bottom:1px solid rgba(15,23,42,0.06);
+  }
+  tbody tr:hover{background:rgba(2,132,199,0.05);}
+  .empty-msg{color:var(--muted); font-size:14px; padding:14px 0; text-align:center;}
+  .table-wrap{max-height:280px; overflow-y:auto;}
+  .table-wrap::-webkit-scrollbar{width:6px;}
+  .table-wrap::-webkit-scrollbar-thumb{background:rgba(15,23,42,0.15); border-radius:4px;}
+
+  .summary-wrap{
+    margin-top:44px;
+    background:var(--glass);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(14px);
+    border-radius:20px;
+    padding:24px;
+    box-shadow:var(--shadow);
+    overflow-x:auto;
+  }
+  .summary-wrap table{min-width:600px;}
+  .summary-wrap thead th{cursor:default; text-align:center; font-weight:700; color:var(--text);}
+  .summary-wrap tbody td{text-align:center; padding:12px 8px;}
+  .summary-wrap tbody tr:last-child{font-weight:700; background:rgba(56,189,248,0.07);}
+  .summary-final{
+    margin-top:20px;
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:14px;
+  }
+  .summary-final .box{
+    background:#f8fafc;
+    border:1px solid var(--glass-border);
+    border-radius:14px;
+    padding:16px;
+    text-align:center;
+  }
+  .summary-final .box .t{font-size:13px; color:var(--muted); margin-bottom:6px;}
+  .summary-final .box .v{font-size:20px; font-weight:700; color:var(--accent);}
+  .summary-final .box.total .v{color:var(--accent2); font-size:24px;}
+
+  footer{
+    text-align:center;
+    margin-top:50px;
+    color:var(--muted);
+    font-size:12px;
+  }
+
+  @media print{
+    body{background:#fff; color:#000;}
+    .stat-card,.tx-card,.summary-wrap{
+      background:#fff !important;
+      border:1px solid #ccc !important;
+      box-shadow:none !important;
+      backdrop-filter:none !important;
+    }
+    .table-wrap{max-height:none; overflow:visible;}
+    thead th{color:#000 !important;}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>تقرير التحويلات المالية</h1>
+    <p>تقرير شامل لعمليات التحويل المعتمدة — مستخرج آلياً من كشف الحساب</p>
+  </header>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <h2 class="section-title">تفاصيل التحويلات حسب المستلم ونوع الحساب</h2>
+  <div class="cards-grid" id="cardsGrid"></div>
+
+  <h2 class="section-title">الملخص النهائي</h2>
+  <div class="summary-wrap">
+    <table id="summaryTable">
+      <thead>
+        <tr>
+          <th>المستلم</th>
+          <th>جوال باي</th>
+          <th>بال باي</th>
+          <th>بنك فلسطين</th>
+          <th>الإجمالي</th>
+        </tr>
+      </thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+    <div class="summary-final" id="summaryFinal"></div>
+  </div>
+
+  <footer>تم إنشاء هذا التقرير آلياً — جميع القيم محسوبة ديناميكياً من بيانات العمليات</footer>
+</div>
+
+<script>
+/* =========================================================
+   بيانات العمليات الخام (مستخرجة بالكامل من الكشف)
+   ========================================================= */
+const rawTransactions = [
+  {
+    "date": "10/05/2026",
+    "sender": "عماد البايض",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 25.0
+  },
+  {
+    "date": "16/05/2026",
+    "sender": "محمد ساق الله",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "17/05/2026",
+    "sender": "ALMONTASERBELLAH  TAYEH",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "17/05/2026",
+    "sender": "نور الدين الحلبي",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 21.0
+  },
+  {
+    "date": "17/05/2026",
+    "sender": "مصطفى الملاحي",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 60.0
+  },
+  {
+    "date": "18/05/2026",
+    "sender": "عوني العيلة",
+    "recipient": "ماجد حسين",
+    "account": "جوال باي",
+    "amount": 1.0
+  },
+  {
+    "date": "18/05/2026",
+    "sender": "اسراء محمود ماضي",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 30.0
+  },
+  {
+    "date": "19/05/2026",
+    "sender": "أسماء علي أبو معمر",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "20/05/2026",
+    "sender": "حنان فايق محمود نصر",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "20/05/2026",
+    "sender": "حنان فايق محمود نصر",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "22/05/2026",
+    "sender": "هيثم عماد حرزالله",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "22/05/2026",
+    "sender": "شيماء سليم صالحة",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "22/05/2026",
+    "sender": "محمد سعيد حرب شحادة",
+    "recipient": "ماجد حسين",
+    "account": "جوال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "23/05/2026",
+    "sender": "هالة محمد عوض الله",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "23/05/2026",
+    "sender": "تحرير مسلم",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "23/05/2026",
+    "sender": "MOHAMMED KHALED AHMED GHAHMAN",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 80.0
+  },
+  {
+    "date": "23/05/2026",
+    "sender": "محمود زقوت",
+    "recipient": "ماجد حسين",
+    "account": "جوال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "محمد ماهر التلمس",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "خالد نزيه الحسيني",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "خضر يوسف نقولا النصراوي",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 50.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "عبدالله ابو العلا",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "ايمان الدهدار",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "حسين علي الترك",
+    "recipient": "ماجد حسين",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "سليم عبدالله سمور",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 15.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "bassam esleem",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "24/05/2026",
+    "sender": "bassam esleem",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 40.0
+  },
+  {
+    "date": "25/05/2026",
+    "sender": "إيمان العمصي",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "25/05/2026",
+    "sender": "شيماء صالحة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 12.0
+  },
+  {
+    "date": "26/05/2026",
+    "sender": "محمد ادريس الدحدوح",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 30.0
+  },
+  {
+    "date": "27/05/2026",
+    "sender": "ريم حميد",
+    "recipient": "محمد ابو عيسى",
+    "account": "جوال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "27/05/2026",
+    "sender": "سارة كمال عبد المنعم كولك",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "28/05/2026",
+    "sender": "احمد ابوطه",
+    "recipient": "محمد ابو عيسى",
+    "account": "جوال باي",
+    "amount": 5.0
+  },
+  {
+    "date": "28/05/2026",
+    "sender": "هيثم عماد حرزالله",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "28/05/2026",
+    "sender": "خالد الحسيني",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "29/05/2026",
+    "sender": "سليم ابو كاشف",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 15.0
+  },
+  {
+    "date": "29/05/2026",
+    "sender": "محمد مدحت النمر",
+    "recipient": "محمد ابو عيسى",
+    "account": "جوال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "29/05/2026",
+    "sender": "شادي اشرف ابو غليون",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 80.0
+  },
+  {
+    "date": "30/05/2026",
+    "sender": "شروق ابراهيم جميل ابو سلوت",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "30/05/2026",
+    "sender": "مؤمن يوسف الحرازين",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 30.0
+  },
+  {
+    "date": "31/05/2026",
+    "sender": "محمود جمال جبر",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "01/06/2026",
+    "sender": "دينا قشطة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 15.0
+  },
+  {
+    "date": "01/06/2026",
+    "sender": "نفين المغربي",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 12.0
+  },
+  {
+    "date": "01/06/2026",
+    "sender": "حمزة حسونة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "04/06/2026",
+    "sender": "هيا عامر اسماعيل الدحدوح",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 15.0
+  },
+  {
+    "date": "04/06/2026",
+    "sender": "بشرى شحده سعود مخيمر",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 50.0
+  },
+  {
+    "date": "04/06/2026",
+    "sender": "عبدالله عادل ربحي رباح حبوش",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "05/06/2026",
+    "sender": "كفاح حسن علي الفار",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "05/06/2026",
+    "sender": "محمود حلام الددح",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "06/06/2026",
+    "sender": "خولة محمد احمد ابو عودة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 2.0
+  },
+  {
+    "date": "06/06/2026",
+    "sender": "منتصر الربعي",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 9.0
+  },
+  {
+    "date": "07/06/2026",
+    "sender": "هالة محمد عوض الله",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "07/06/2026",
+    "sender": "تيسير مصطفى الشرفا",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "09/06/2026",
+    "sender": "محمد محمد قرضايا",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "10/06/2026",
+    "sender": "عماد البايض",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "11/06/2026",
+    "sender": "سماح عفانة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 15.0
+  },
+  {
+    "date": "11/06/2026",
+    "sender": "خولة محمد احمد ابو عودة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 4.0
+  },
+  {
+    "date": "12/06/2026",
+    "sender": "اية اشرف الخضري",
+    "recipient": "محمد ابو عيسى",
+    "account": "جوال باي",
+    "amount": 9.0
+  },
+  {
+    "date": "12/06/2026",
+    "sender": "عماد البايض",
+    "recipient": "محمد ابو عيسى",
+    "account": "جوال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "13/06/2026",
+    "sender": "خولة محمد احمد ايو عودة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 6.0
+  },
+  {
+    "date": "16/06/2026",
+    "sender": "تسنيم ابراهيم السوري",
+    "recipient": "محمد ابو عيسى",
+    "account": "جوال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "16/06/2026",
+    "sender": "نور الدين زيدان",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 5.0
+  },
+  {
+    "date": "17/06/2026",
+    "sender": "شيماء صالحة",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 13.0
+  },
+  {
+    "date": "21/06/2026",
+    "sender": "منتصر الربعي",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 5.0
+  },
+  {
+    "date": "21/06/2026",
+    "sender": "هاني ابو القمبز",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "22/06/2026",
+    "sender": "وسيم محمد ابوكويك",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 30.0
+  },
+  {
+    "date": "23/06/2026",
+    "sender": "احمد العمارين",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "25/06/2026",
+    "sender": "ماجد حسين",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "26/06/2026",
+    "sender": "محمود احمد الشيخ",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "26/06/2026",
+    "sender": "عبد القادر أحمد وشاح",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 15.0
+  },
+  {
+    "date": "28/06/2026",
+    "sender": "محمد اليازجي",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "28/06/2026",
+    "sender": "تيسير الشرفا",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 10.0
+  },
+  {
+    "date": "30/06/2026",
+    "sender": "محمود زقوت",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 50.0
+  },
+  {
+    "date": "30/06/2026",
+    "sender": "محمد البهداري",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "01/07/2026",
+    "sender": "عمر عجور",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 5.0
+  },
+  {
+    "date": "01/07/2026",
+    "sender": "عماد البايض",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 10.0
+  },
+  {
+    "date": "02/07/2026",
+    "sender": "رؤى عمر الحداد",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 12.0
+  },
+  {
+    "date": "08/07/2026",
+    "sender": "محمد أيمن عبدالقادر البهداري",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 9.0
+  },
+  {
+    "date": "12/07/2026",
+    "sender": "احمد ابوشعبان",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 20.0
+  },
+  {
+    "date": "18/07/2026",
+    "sender": "محمد ابو العون",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 5.0
+  },
+  {
+    "date": "19/07/2026",
+    "sender": "ماجد حسين",
+    "recipient": "ماجد حسين",
+    "account": "بنك فلسطين",
+    "amount": 20.0
+  },
+  {
+    "date": "19/07/2026",
+    "sender": "محمد ابو عيسى",
+    "recipient": "محمد ابو عيسى",
+    "account": "بنك فلسطين",
+    "amount": 8.0
+  },
+  {
+    "date": "20/07/2026",
+    "sender": "حسين علي الترك",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 5.0
+  },
+  {
+    "date": "20/07/2026",
+    "sender": "محمد قرضايا",
+    "recipient": "محمد ابو عيسى",
+    "account": "بال باي",
+    "amount": 5.0
+  }
+];
+
+/* =========================================================
+   الإعدادات الثابتة
+   ========================================================= */
+const RECIPIENTS = ["ماجد حسين", "محمد ابو عيسى"];
+const RECIPIENT_LABELS = {
+  "ماجد حسين": "ماجد حسين",
+  "محمد ابو عيسى": "محمد أبو عيسى"
+};
+const ACCOUNTS = ["جوال باي", "بال باي", "بنك فلسطين"];
+
+/* =========================================================
+   دوال تنسيق
+   ========================================================= */
+function formatCurrency(amount){
+  return "₪" + amount.toLocaleString('en-US', {minimumFractionDigits:0, maximumFractionDigits:2});
+}
+
+/* =========================================================
+   دوال الحسابات
+   ========================================================= */
+function filterByRecipientAccount(recipient, account){
+  return rawTransactions.filter(t => t.recipient === recipient && t.account === account);
+}
+function sumAmount(list){
+  return list.reduce((s,t) => s + t.amount, 0);
+}
+function totalByRecipient(recipient){
+  return sumAmount(rawTransactions.filter(t => t.recipient === recipient));
+}
+function totalByAccount(account){
+  return sumAmount(rawTransactions.filter(t => t.account === account));
+}
+function grandTotal(){
+  return sumAmount(rawTransactions);
+}
+
+/* =========================================================
+   بناء لوحة الإحصائيات
+   ========================================================= */
+function renderStats(){
+  const stats = [
+    { label:"إجمالي عدد العمليات", value: rawTransactions.length, cls:"" },
+    { label:"إجمالي قيمة جميع التحويلات", value: formatCurrency(grandTotal()), cls:"money" },
+    { label:"إجمالي ما استلمه ماجد حسين", value: formatCurrency(totalByRecipient("ماجد حسين")), cls:"majid" },
+    { label:"إجمالي ما استلمه محمد أبو عيسى", value: formatCurrency(totalByRecipient("محمد ابو عيسى")), cls:"mohammed" },
+    { label:"إجمالي عمليات جوال باي", value: formatCurrency(totalByAccount("جوال باي")), cls:"" },
+    { label:"إجمالي عمليات بال باي", value: formatCurrency(totalByAccount("بال باي")), cls:"" },
+    { label:"إجمالي عمليات بنك فلسطين", value: formatCurrency(totalByAccount("بنك فلسطين")), cls:"" }
+  ];
+  const grid = document.getElementById('statsGrid');
+  grid.innerHTML = stats.map(s => `
+    <div class="stat-card ${s.cls}">
+      <div class="label">${s.label}</div>
+      <div class="value">${s.value}</div>
+    </div>
+  `).join('');
+}
+
+/* =========================================================
+   الفرز
+   ========================================================= */
+function parseDate(d){
+  const [day, month, year] = d.split('/').map(Number);
+  return new Date(year, month-1, day).getTime();
+}
+function sortRows(rows, key, dir){
+  const copy = [...rows];
+  copy.sort((a,b) => {
+    let va, vb;
+    if(key === 'date'){ va = parseDate(a.date); vb = parseDate(b.date); }
+    else if(key === 'amount'){ va = a.amount; vb = b.amount; }
+    else { va = a.sender; vb = b.sender; }
+    if(va < vb) return dir === 'asc' ? -1 : 1;
+    if(va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+  return copy;
+}
+
+/* =========================================================
+   بناء البطاقات
+   ========================================================= */
+const cardState = {};
+
+function cardId(recipient, account){
+  return (recipient + "_" + account).replace(/\s+/g,'_');
+}
+
+function renderCardTable(recipient, account){
+  const id = cardId(recipient, account);
+  const state = cardState[id];
+  const rows = sortRows(state.rows, state.sortKey, state.sortDir);
+  const tbody = document.getElementById('tbody_' + id);
+  if(rows.length === 0){
+    tbody.parentElement.parentElement.querySelector('.table-area').innerHTML = '<div class="empty-msg">لا توجد عمليات.</div>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>${r.date}</td>
+      <td>${r.sender}</td>
+      <td>${formatCurrency(r.amount)}</td>
+    </tr>
+  `).join('');
+}
+
+function attachSortHandlers(recipient, account){
+  const id = cardId(recipient, account);
+  const ths = document.querySelectorAll(`#card_${id} thead th`);
+  ths.forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.getAttribute('data-key');
+      const state = cardState[id];
+      if(state.sortKey === key){
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortKey = key;
+        state.sortDir = 'asc';
+      }
+      ths.forEach(t => t.querySelector('.arrow').textContent = '');
+      th.querySelector('.arrow').textContent = state.sortDir === 'asc' ? '▲' : '▼';
+      renderCardTable(recipient, account);
+    });
+  });
+}
+
+function renderCards(){
+  const grid = document.getElementById('cardsGrid');
+  let html = '';
+  RECIPIENTS.forEach(recipient => {
+    ACCOUNTS.forEach(account => {
+      const rows = filterByRecipientAccount(recipient, account);
+      const id = cardId(recipient, account);
+      cardState[id] = { rows, sortKey:'date', sortDir:'asc' };
+      const total = sumAmount(rows);
+      html += `
+        <div class="tx-card" id="card_${id}">
+          <div class="card-head">
+            <h3>${RECIPIENT_LABELS[recipient]} — ${account}</h3>
+            <span class="badge">${rows.length} عملية</span>
+          </div>
+          <div class="card-meta">
+            <span>عدد العمليات: <b>${rows.length}</b></span>
+            <span>الإجمالي: <b>${formatCurrency(total)}</b></span>
+          </div>
+          <div class="table-area">
+            ${rows.length === 0 ? '<div class="empty-msg">لا توجد عمليات.</div>' : `
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th data-key="date">التاريخ<span class="arrow"></span></th>
+                    <th data-key="sender">اسم المحول<span class="arrow"></span></th>
+                    <th data-key="amount">المبلغ<span class="arrow"></span></th>
+                  </tr>
+                </thead>
+                <tbody id="tbody_${id}"></tbody>
+              </table>
+            </div>`}
+          </div>
+        </div>
+      `;
+    });
+  });
+  grid.innerHTML = html;
+
+  RECIPIENTS.forEach(recipient => {
+    ACCOUNTS.forEach(account => {
+      const rows = filterByRecipientAccount(recipient, account);
+      if(rows.length > 0){
+        renderCardTable(recipient, account);
+        attachSortHandlers(recipient, account);
+        const id = cardId(recipient, account);
+        const firstTh = document.querySelector(`#card_${id} thead th[data-key="date"] .arrow`);
+        if(firstTh) firstTh.textContent = '▲';
+      }
+    });
+  });
+}
+
+/* =========================================================
+   بناء الملخص النهائي
+   ========================================================= */
+function renderSummary(){
+  const body = document.getElementById('summaryBody');
+  let rowsHtml = '';
+  let grandJawwal = 0, grandBal = 0, grandBank = 0, grandAll = 0;
+
+  RECIPIENTS.forEach(recipient => {
+    const jawwal = sumAmount(filterByRecipientAccount(recipient, "جوال باي"));
+    const bal = sumAmount(filterByRecipientAccount(recipient, "بال باي"));
+    const bank = sumAmount(filterByRecipientAccount(recipient, "بنك فلسطين"));
+    const total = jawwal + bal + bank;
+    grandJawwal += jawwal;
+    grandBal += bal;
+    grandBank += bank;
+    grandAll += total;
+    rowsHtml += `
+      <tr>
+        <td>${RECIPIENT_LABELS[recipient]}</td>
+        <td>${formatCurrency(jawwal)}</td>
+        <td>${formatCurrency(bal)}</td>
+        <td>${formatCurrency(bank)}</td>
+        <td>${formatCurrency(total)}</td>
+      </tr>
+    `;
+  });
+
+  rowsHtml += `
+    <tr>
+      <td>الإجمالي العام</td>
+      <td>${formatCurrency(grandJawwal)}</td>
+      <td>${formatCurrency(grandBal)}</td>
+      <td>${formatCurrency(grandBank)}</td>
+      <td>${formatCurrency(grandAll)}</td>
+    </tr>
+  `;
+  body.innerHTML = rowsHtml;
+
+  const final = document.getElementById('summaryFinal');
+  final.innerHTML = `
+    <div class="box">
+      <div class="t">إجمالي ما استلمه ماجد حسين</div>
+      <div class="v">${formatCurrency(totalByRecipient("ماجد حسين"))}</div>
+    </div>
+    <div class="box">
+      <div class="t">إجمالي ما استلمه محمد أبو عيسى</div>
+      <div class="v">${formatCurrency(totalByRecipient("محمد ابو عيسى"))}</div>
+    </div>
+    <div class="box total">
+      <div class="t">الإجمالي العام لجميع التحويلات</div>
+      <div class="v">${formatCurrency(grandTotal())}</div>
+    </div>
+  `;
+}
+
+/* =========================================================
+   التشغيل
+   ========================================================= */
+renderStats();
+renderCards();
+renderSummary();
+</script>
+</body>
+</html>
